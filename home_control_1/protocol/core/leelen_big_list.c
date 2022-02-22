@@ -1,15 +1,15 @@
 /********************************************************************************
 **
-** ÎÄ¼şÃû:     leelen_big_list.c
-** °æÈ¨ËùÓĞ:   (c) 2015 ÏÃÃÅÁ¢ÁÖ¿Æ¼¼ÓĞÏŞ¹«Ë¾
-** ÎÄ¼şÃèÊö:   ÊµÏÖÍ¨Ñ¶Ğ­Òé´óÊı¾İ»º³å·¢ËÍ¶ÓÁĞ
+** æ–‡ä»¶å:     leelen_big_list.c
+** ç‰ˆæƒæ‰€æœ‰:   (c) 2015 å¦é—¨ç«‹æ—ç§‘æŠ€æœ‰é™å…¬å¸
+** æ–‡ä»¶æè¿°:   å®ç°é€šè®¯åè®®å¤§æ•°æ®ç¼“å†²å‘é€é˜Ÿåˆ—
 **
 *********************************************************************************
-**             ĞŞ¸ÄÀúÊ·¼ÇÂ¼
+**             ä¿®æ”¹å†å²è®°å½•
 **===============================================================================
-**| ÈÕÆÚ       | ×÷Õß   |  ĞŞ¸Ä¼ÇÂ¼
+**| æ—¥æœŸ       | ä½œè€…   |  ä¿®æ”¹è®°å½•
 **===============================================================================
-**| 2015/09/28 | zzh    |  ´´½¨¸ÃÎÄ¼ş
+**| 2015/09/28 | zzh    |  åˆ›å»ºè¯¥æ–‡ä»¶
 **
 *********************************************************************************/
 
@@ -28,39 +28,39 @@
 
 /*
 ********************************************************************************
-* ²ÎÊı¶¨Òå
+* å‚æ•°å®šä¹‰
 ********************************************************************************
 */
 #define DEBUG_BIGLIST                       0
 
-#define MAX_NODE                            20                      /* ÔÊĞí»º³åµÄ×î´óÊı¾İ°ü¸öÊı */
+#define MAX_NODE                            20                      /* å…è®¸ç¼“å†²çš„æœ€å¤§æ•°æ®åŒ…ä¸ªæ•° */
 
-#define MAX_SEND                            10                      /* ×î´óÖØ´«µÄ´ÎÊı */
-#define PERIOD_SCAN                         100                     /* É¨ÃèÖÜÆÚ, µ¥Î»:ms */
+#define MAX_SEND                            10                      /* æœ€å¤§é‡ä¼ çš„æ¬¡æ•° */
+#define PERIOD_SCAN                         100                     /* æ‰«æå‘¨æœŸ, å•ä½:ms */
 
-#define DEF_OVERTIME                        (15*(1000/PERIOD_SCAN)) /* È±Ê¡Ó¦´ğ³¬Ê±Ê±¼ä, µ¥Î»: Ãë ÖÁÉÙÒª±ÈsocketÁ¬½Ó³¬Ê±Ê±¼ä³¤ */
-#define DEF_SEND                            3                       /* È±Ê¡·¢ËÍ´ÎÊı */
+#define DEF_OVERTIME                        (15*(1000/PERIOD_SCAN)) /* ç¼ºçœåº”ç­”è¶…æ—¶æ—¶é—´, å•ä½: ç§’ è‡³å°‘è¦æ¯”socketè¿æ¥è¶…æ—¶æ—¶é—´é•¿ */
+#define DEF_SEND                            3                       /* ç¼ºçœå‘é€æ¬¡æ•° */
 
 
 /*
 ********************************************************************************
-* ¶¨ÒåÊı¾İ°ü½ÚµãÊı¾İ½á¹¹
+* å®šä¹‰æ•°æ®åŒ…èŠ‚ç‚¹æ•°æ®ç»“æ„
 ********************************************************************************
 */
 typedef struct {
-    uint16_t      keyword;            /* ¹Ø¼ü×Ö */
-    uint8_t       ct_time;            /* Ê±¼ä¼ÆÊı */
-    uint8_t       ct_send;            /* ÒÑ´«ËÍ´ÎÊı */
-    uint8_t       max_time;           /* °ü·¢ËÍ³¬Ê±Ê±¼ä */
-    uint8_t       max_send;           /* °ü×î¶àÖØ´«µÄ´ÎÊı */
-    uint8_t       file_send;          /* ÎÄ¼ş·¢ËÍ´ÎÊı */
-    big_packet_t  *pkt;               /* Êı¾İ·Ö×é */
+    uint16_t      keyword;            /* å…³é”®å­— */
+    uint8_t       ct_time;            /* æ—¶é—´è®¡æ•° */
+    uint8_t       ct_send;            /* å·²ä¼ é€æ¬¡æ•° */
+    uint8_t       max_time;           /* åŒ…å‘é€è¶…æ—¶æ—¶é—´ */
+    uint8_t       max_send;           /* åŒ…æœ€å¤šé‡ä¼ çš„æ¬¡æ•° */
+    uint8_t       file_send;          /* æ–‡ä»¶å‘é€æ¬¡æ•° */
+    big_packet_t  *pkt;               /* æ•°æ®åˆ†ç»„ */
     void          (*informer)(RESULT_E);
 } big_node_t;
 
 /*
 ********************************************************************************
-* ¶¨ÒåÄ£¿é¾Ö²¿±äÁ¿
+* å®šä¹‰æ¨¡å—å±€éƒ¨å˜é‡
 ********************************************************************************
 */
 static struct {
@@ -74,51 +74,51 @@ static big_node_t    *s_curnode;
 static uint8_t        s_scantmrid;
 
 /*******************************************************************
-** º¯ÊıÃû:     free_cur_big_node
-** º¯ÊıÃèÊö:   ÊÍ·Åµ±Ç°´¦ÀíµÄ½Úµã
-** ²ÎÊı:       [in]  stop: Í£Ö¹·¢ËÍ
-** ·µ»Ø:       ÎŞ
+** å‡½æ•°å:     free_cur_big_node
+** å‡½æ•°æè¿°:   é‡Šæ”¾å½“å‰å¤„ç†çš„èŠ‚ç‚¹
+** å‚æ•°:       [in]  stop: åœæ­¢å‘é€
+** è¿”å›:       æ— 
 ********************************************************************/
 static void free_cur_big_node(bool_t stop, RESULT_E result)
 {
     void (*informer)(RESULT_E);
 
     if (s_curnode != NULL) {
-        if (result == RESULT_OVER && s_curnode->file_send < DEF_SEND){/* Ò»¸öÎÄ¼ş×î¶à·¢3´Î */
+        if (result == RESULT_OVER && s_curnode->file_send < DEF_SEND){/* ä¸€ä¸ªæ–‡ä»¶æœ€å¤šå‘3æ¬¡ */
             s_curnode->pkt->cur_pktid  = 1;
-            s_curnode->pkt->session_id = s_session_id;                /* »á»°IDÖØĞÂ·ÖÅä */
+            s_curnode->pkt->session_id = s_session_id;                /* ä¼šè¯IDé‡æ–°åˆ†é… */
             s_session_id++;
             if (s_session_id == 0){
                 s_session_id = 1;
             }
-            append_list_ele(&s_usedlist, s_curnode);                 /* ¹ÒÁ´±íÎ²·¢ËÍ */
+            append_list_ele(&s_usedlist, s_curnode);                 /* æŒ‚é“¾è¡¨å°¾å‘é€ */
             s_curnode = NULL;
             return;
         }
         
         informer = s_curnode->informer;
-        big_packet_free(s_curnode->pkt);                             /* ÊÍ·Åµ±Ç°½ÚµãµÄÊı¾İ°ü */
+        big_packet_free(s_curnode->pkt);                             /* é‡Šæ”¾å½“å‰èŠ‚ç‚¹çš„æ•°æ®åŒ… */
         s_curnode->pkt = NULL;
-        append_list_ele(&s_freelist, s_curnode);                     /* ½«µ±Ç°½Úµã¹Òµ½¿ÕÏĞÁ´±íÖĞ */
+        append_list_ele(&s_freelist, s_curnode);                     /* å°†å½“å‰èŠ‚ç‚¹æŒ‚åˆ°ç©ºé—²é“¾è¡¨ä¸­ */
         s_curnode = NULL;
         if (stop) {                            
 #if DEBUG_BIGLIST > 0
             LEE_LOG("free node, stopsend");
 #endif
-            udp_big_stopsend();                                       /* Í£Ö¹·¢ËÍ */
+            udp_big_stopsend();                                       /* åœæ­¢å‘é€ */
         }
-        if (informer != NULL) {                                       /* Ö´ĞĞ»Øµ÷Í¨Öªº¯Êı */
+        if (informer != NULL) {                                       /* æ‰§è¡Œå›è°ƒé€šçŸ¥å‡½æ•° */
             informer(result);
         }
     }
 }
 
 /*******************************************************************
-** º¯ÊıÃû:     big_list_informer
-** º¯ÊıÃèÊö:   Êı¾İ·¢ËÍÍ¨Öªº¯Êı
-** ²ÎÊı:       [in]  result:        ·¢ËÍ½á¹û
-**             [in]  ackcode:       ÏìÓ¦´úÂë
-** ·µ»Ø:       ÎŞ
+** å‡½æ•°å:     big_list_informer
+** å‡½æ•°æè¿°:   æ•°æ®å‘é€é€šçŸ¥å‡½æ•°
+** å‚æ•°:       [in]  result:        å‘é€ç»“æœ
+**             [in]  ackcode:       å“åº”ä»£ç 
+** è¿”å›:       æ— 
 ********************************************************************/
 static void big_list_informer(SOCK_RESULT_E result, int ackcode)
 {
@@ -128,9 +128,9 @@ static void big_list_informer(SOCK_RESULT_E result, int ackcode)
 #endif
     if (s_curnode != NULL && SOCK_RESULT_ACK == result) {
         if (s_curnode->pkt->cur_pktid == s_curnode->pkt->total_pkt){
-            free_cur_big_node(false, RESULT_SUCCESS);                      /* ÒÑ½ÓÊÕµ½Ó¦´ğ,ÊÍ·Åµ±Ç°·¢ËÍ½Úµã */
+            free_cur_big_node(false, RESULT_SUCCESS);                      /* å·²æ¥æ”¶åˆ°åº”ç­”,é‡Šæ”¾å½“å‰å‘é€èŠ‚ç‚¹ */
         } else {
-            if ((s_curnode->pkt->cur_pktid + 1)  == s_curnode->pkt->total_pkt){ /* ×îºóÒ»°ü */
+            if ((s_curnode->pkt->cur_pktid + 1)  == s_curnode->pkt->total_pkt){ /* æœ€åä¸€åŒ… */
                 s_curnode->pkt->cur_size = s_curnode->pkt->file_length %PKT_DATA_SIZE;
                 if (s_curnode->pkt->cur_size == 0){
                     s_curnode->pkt->cur_size = PKT_DATA_SIZE;
@@ -145,46 +145,46 @@ static void big_list_informer(SOCK_RESULT_E result, int ackcode)
         }
     } else {
         if (s_curnode != NULL) {
-            s_curnode->ct_time = 2*s_curnode->max_time;                  /* ·¢ËÍÊ§°Ü,ÖÃ³É³¬Ê±, ±íÊ¾ĞèÒªÖØ´« */
+            s_curnode->ct_time = 2*s_curnode->max_time;                  /* å‘é€å¤±è´¥,ç½®æˆè¶…æ—¶, è¡¨ç¤ºéœ€è¦é‡ä¼  */
         }
     }
 }
 
 /*******************************************************************
-** º¯ÊıÃû:     scan_timer_proc
-** º¯ÊıÃèÊö:   É¨Ãè¶¨Ê±Æ÷´¦Àíº¯Êı
-** ²ÎÊı:       ÎŞ 
-** ·µ»Ø:       ÎŞ
+** å‡½æ•°å:     scan_timer_proc
+** å‡½æ•°æè¿°:   æ‰«æå®šæ—¶å™¨å¤„ç†å‡½æ•°
+** å‚æ•°:       æ—  
+** è¿”å›:       æ— 
 ********************************************************************/
 static void scan_timer_proc(void)
 {
     start_timer(s_scantmrid, PERIOD_SCAN, true);
-    if (get_list_item(&s_usedlist) == 0 && s_curnode == NULL) {        /* ²»´æÔÚĞè·¢ËÍµÄÊı¾İ½Úµã */
-        stop_timer(s_scantmrid);                                       /* Í£Ö¹É¨Ãè¶¨Ê±Æ÷ */
+    if (get_list_item(&s_usedlist) == 0 && s_curnode == NULL) {        /* ä¸å­˜åœ¨éœ€å‘é€çš„æ•°æ®èŠ‚ç‚¹ */
+        stop_timer(s_scantmrid);                                       /* åœæ­¢æ‰«æå®šæ—¶å™¨ */
         return;
     }
 
-    if (s_curnode == NULL) {                                          /* µ±Ç°´¦Àí½Úµã²»´æÔÚ */
-        s_curnode = (big_node_t *)del_list_head(&s_usedlist);         /* »ñÈ¡µ±Ç°´¦Àí½Úµã */
+    if (s_curnode == NULL) {                                          /* å½“å‰å¤„ç†èŠ‚ç‚¹ä¸å­˜åœ¨ */
+        s_curnode = (big_node_t *)del_list_head(&s_usedlist);         /* è·å–å½“å‰å¤„ç†èŠ‚ç‚¹ */
         LEE_ASSERT(s_curnode != 0);
-        s_curnode->ct_time = 0;                                       /* ½«Ê±¼ä¼ÆÊıÖÃ³É0 */
+        s_curnode->ct_time = 0;                                       /* å°†æ—¶é—´è®¡æ•°ç½®æˆ0 */
         s_curnode->ct_send = 0;
         s_curnode->file_send++;
     }
 
-    if (s_curnode->ct_time == 0) {                                    /* Ê±¼ä¼ÆÊıÎª0, ±íÊ¾ĞèÒª·¢ËÍ */
+    if (s_curnode->ct_time == 0) {                                    /* æ—¶é—´è®¡æ•°ä¸º0, è¡¨ç¤ºéœ€è¦å‘é€ */
         if (!udp_big_send(s_curnode->pkt, big_list_informer)){
             free_cur_big_node(false, RESULT_NULL);
             return;
         }
     }
-    if (++s_curnode->ct_time >= s_curnode->max_time) {                 /* ÒÑµ½³¬Ê±Ê±¼ä */
+    if (++s_curnode->ct_time >= s_curnode->max_time) {                 /* å·²åˆ°è¶…æ—¶æ—¶é—´ */
 #if DEBUG_BIGLIST > 0
         LEE_LOG("sendbig time overflow, reset");
 #endif
-        udp_big_reset();                                              /* ¸´Î»socket */
-        start_timer(s_scantmrid, 2*1000, true);                       /* ¸´Î»ºóÑÓÊ± */
-        if (++s_curnode->ct_send >= s_curnode->max_send) {            /* ·¢ËÍ´ÎÊıÒÑ´ïµ½Éè¶¨Öµ */
+        udp_big_reset();                                              /* å¤ä½socket */
+        start_timer(s_scantmrid, 2*1000, true);                       /* å¤ä½åå»¶æ—¶ */
+        if (++s_curnode->ct_send >= s_curnode->max_send) {            /* å‘é€æ¬¡æ•°å·²è¾¾åˆ°è®¾å®šå€¼ */
             free_cur_big_node(false, RESULT_OVER);
         } else {
             s_curnode->ct_time = 0;
@@ -193,17 +193,17 @@ static void scan_timer_proc(void)
 }
 
 /*******************************************************************
-** º¯ÊıÃû:     apply_send_list
-** º¯ÊıÃèÊö:   ÇëÇó·¢ËÍĞ­ÒéÊı¾İ
-** ²ÎÊı:       [in]  keyword:       ÇëÇó·¢ËÍµÄÊı¾İ°ü¹Ø¼ü×Ö, Í¨³£Ìî³äĞ­ÒéÃüÁî×Ö
-**             [in]  pkt:           ´ı·¢ËÍµÄÊı¾İ°ü
-**             [in]  over_time:     Ö¸¶¨·¢ËÍ³¬Ê±Ê±¼ä(µ¥Î»:Ãë)
-**             [in]  max_send:      ÔÚ½ÓÊÕ²»µ½Ó¦´ğÇé¿öÏÂµÄ×î´ó´«ËÍ´ÎÊı
-**             [in]  informer:      ·¢ËÍ½á¹û»Øµ÷º¯Êı
-** ·µ»Ø:       ÈçÇëÇóÊ§°Ü, Ôò·µ»Øfalse;  ³É¹¦, Ôò·µ»ØÒ»¸ö²»Îª0µÄ±êÊ¶
-** ×¢Òâ:       1. Êı¾İ°üpkt»áÔÚ±¾Ä£¿éÄÚ²¿½øĞĞÊÍ·Å, Ò»µ©µ÷ÓÃÁË¸Ã½Ó¿Ú, ÎŞÂÛ³É¹¦»òÊ§°Ü, µ÷ÓÃÕß¶¼ÎŞĞèÊÍ·Åpkt;
-**             2. Èçover_timeÎª0, Ôò±íÊ¾²ÉÓÃÈ±Ê¡³¬Ê±Ê±¼ä(¼´15Ãë)
-**             3. Èçmax_sendÎª0, Ôò±íÊ¾²ÉÓÃÈ±Ê¡·¢ËÍ´ÎÊı(¼´3´Î);
+** å‡½æ•°å:     apply_send_list
+** å‡½æ•°æè¿°:   è¯·æ±‚å‘é€åè®®æ•°æ®
+** å‚æ•°:       [in]  keyword:       è¯·æ±‚å‘é€çš„æ•°æ®åŒ…å…³é”®å­—, é€šå¸¸å¡«å……åè®®å‘½ä»¤å­—
+**             [in]  pkt:           å¾…å‘é€çš„æ•°æ®åŒ…
+**             [in]  over_time:     æŒ‡å®šå‘é€è¶…æ—¶æ—¶é—´(å•ä½:ç§’)
+**             [in]  max_send:      åœ¨æ¥æ”¶ä¸åˆ°åº”ç­”æƒ…å†µä¸‹çš„æœ€å¤§ä¼ é€æ¬¡æ•°
+**             [in]  informer:      å‘é€ç»“æœå›è°ƒå‡½æ•°
+** è¿”å›:       å¦‚è¯·æ±‚å¤±è´¥, åˆ™è¿”å›false;  æˆåŠŸ, åˆ™è¿”å›ä¸€ä¸ªä¸ä¸º0çš„æ ‡è¯†
+** æ³¨æ„:       1. æ•°æ®åŒ…pktä¼šåœ¨æœ¬æ¨¡å—å†…éƒ¨è¿›è¡Œé‡Šæ”¾, ä¸€æ—¦è°ƒç”¨äº†è¯¥æ¥å£, æ— è®ºæˆåŠŸæˆ–å¤±è´¥, è°ƒç”¨è€…éƒ½æ— éœ€é‡Šæ”¾pkt;
+**             2. å¦‚over_timeä¸º0, åˆ™è¡¨ç¤ºé‡‡ç”¨ç¼ºçœè¶…æ—¶æ—¶é—´(å³15ç§’)
+**             3. å¦‚max_sendä¸º0, åˆ™è¡¨ç¤ºé‡‡ç”¨ç¼ºçœå‘é€æ¬¡æ•°(å³3æ¬¡);
 ********************************************************************/
 bool_t apply_big_list(uint16_t keyword, big_packet_t *pkt, uint8_t over_time, uint8_t max_send, void (*informer)(RESULT_E))
 {
@@ -211,17 +211,17 @@ bool_t apply_big_list(uint16_t keyword, big_packet_t *pkt, uint8_t over_time, ui
 
     LEE_ASSERT(pkt != NULL);
     
-    node = (big_node_t *)del_list_head(&s_freelist);                  /* ÉêÇë¿ÕÏĞ½Úµã */
-    if (node == NULL) {                                               /* ÉêÇëÊ§°Ü */
-        big_packet_free(pkt);                                         /* ÊÍ·ÅÊı¾İ°ü¿Õ¼ä×ÊÔ´ */
-        return false;                                                 /* ±íÊ¾ÇëÇó·¢ËÍÊ§°Ü */
+    node = (big_node_t *)del_list_head(&s_freelist);                  /* ç”³è¯·ç©ºé—²èŠ‚ç‚¹ */
+    if (node == NULL) {                                               /* ç”³è¯·å¤±è´¥ */
+        big_packet_free(pkt);                                         /* é‡Šæ”¾æ•°æ®åŒ…ç©ºé—´èµ„æº */
+        return false;                                                 /* è¡¨ç¤ºè¯·æ±‚å‘é€å¤±è´¥ */
     }
 
-    big_packet_assemble(pkt, keyword, s_session_id, PKT_DATA_SIZE);    /* ×é³ÉÍêÕûÖ¡ */
+    big_packet_assemble(pkt, keyword, s_session_id, PKT_DATA_SIZE);    /* ç»„æˆå®Œæ•´å¸§ */
     if (over_time == 0){
         over_time = DEF_OVERTIME;
     }
-    if (max_send == 0) {                                              /* ²ÉÓÃÈ±Ê¡·¢ËÍ´ÎÊı */
+    if (max_send == 0) {                                              /* é‡‡ç”¨ç¼ºçœå‘é€æ¬¡æ•° */
         max_send = DEF_SEND;
     }
     if (max_send > MAX_SEND) {
@@ -253,32 +253,32 @@ bool_t apply_big_list(uint16_t keyword, big_packet_t *pkt, uint8_t over_time, ui
 }
 
 /*******************************************************************
-** º¯ÊıÃû:     cancel_send_list
-** º¯ÊıÃèÊö:   É¾³ı·¢ËÍÁ´±íÖĞµÄÖ¸¶¨½Úµã
-** ²ÎÊı:       [in]  keyword:    É¾³ıÃüÁî×Ö
-** ·µ»Ø:       ÎŞ
+** å‡½æ•°å:     cancel_send_list
+** å‡½æ•°æè¿°:   åˆ é™¤å‘é€é“¾è¡¨ä¸­çš„æŒ‡å®šèŠ‚ç‚¹
+** å‚æ•°:       [in]  keyword:    åˆ é™¤å‘½ä»¤å­—
+** è¿”å›:       æ— 
 ********************************************************************/
 void cancel_big_list(uint16_t keyword)
 {
     big_node_t  *node, *next;
 
-    if (s_curnode != NULL) {                                          /* ÅĞ¶Ïµ±Ç°½ÚµãÊÇ·ñÂú×ãÒªÇó */
+    if (s_curnode != NULL) {                                          /* åˆ¤æ–­å½“å‰èŠ‚ç‚¹æ˜¯å¦æ»¡è¶³è¦æ±‚ */
         if (s_curnode->keyword == keyword) {
             free_cur_big_node(true, RESULT_NULL);
         }
     }
 
-    node = (big_node_t *)get_list_head(&s_usedlist);                 /* ±éÀúÁ´±íÖĞÊÇ·ñ´æÔÚÂú×ãÌõ¼şµÄ½Úµã */
+    node = (big_node_t *)get_list_head(&s_usedlist);                 /* éå†é“¾è¡¨ä¸­æ˜¯å¦å­˜åœ¨æ»¡è¶³æ¡ä»¶çš„èŠ‚ç‚¹ */
     for (;;) {
         if (node == NULL) {
             break;
         }
 
         if (node->keyword == keyword) {
-            big_packet_free(node->pkt);                              /* ÊÍ·Å½ÚµãÖĞ±£´æµÄÊı¾İ°ü */
+            big_packet_free(node->pkt);                              /* é‡Šæ”¾èŠ‚ç‚¹ä¸­ä¿å­˜çš„æ•°æ®åŒ… */
             node->pkt = NULL;
-            next = (big_node_t *)del_list_ele(&s_usedlist, node);     /* ´Ó·¢ËÍÁ´±íÖĞÉ¾³ı */
-            append_list_ele(&s_freelist, node);                       /* ½«½Úµã¹Òµ½¿ÕÏĞÁ´±íÉÏ */
+            next = (big_node_t *)del_list_ele(&s_usedlist, node);     /* ä»å‘é€é“¾è¡¨ä¸­åˆ é™¤ */
+            append_list_ele(&s_freelist, node);                       /* å°†èŠ‚ç‚¹æŒ‚åˆ°ç©ºé—²é“¾è¡¨ä¸Š */
             node = next;
         } else {
             node = (big_node_t *)get_list_next_ele(node);
@@ -287,10 +287,10 @@ void cancel_big_list(uint16_t keyword)
 }
 
 /*******************************************************************
-** º¯ÊıÃû:     init_send_list
-** º¯ÊıÃèÊö:   ³õÊ¼»¯º¯Êı
-** ²ÎÊı:       ÎŞ
-** ·µ»Ø:       ÎŞ
+** å‡½æ•°å:     init_send_list
+** å‡½æ•°æè¿°:   åˆå§‹åŒ–å‡½æ•°
+** å‚æ•°:       æ— 
+** è¿”å›:       æ— 
 ********************************************************************/
 void init_big_list(void)
 {

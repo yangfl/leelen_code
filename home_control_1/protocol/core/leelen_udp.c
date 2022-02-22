@@ -1,15 +1,15 @@
 /********************************************************************************
 **
-** ÎÄ¼şÃû:     leelen_udp.c
-** °æÈ¨ËùÓĞ:   (c) 2015 ÏÃÃÅÁ¢ÁÖ¿Æ¼¼ÓĞÏŞ¹«Ë¾
-** ÎÄ¼şÃèÊö:   ÊµÏÖÍ¨Ñ¶Ğ­ÒéÊı¾İUDP·¢ËÍ
+** æ–‡ä»¶å:     leelen_udp.c
+** ç‰ˆæƒæ‰€æœ‰:   (c) 2015 å¦é—¨ç«‹æ—ç§‘æŠ€æœ‰é™å…¬å¸
+** æ–‡ä»¶æè¿°:   å®ç°é€šè®¯åè®®æ•°æ®UDPå‘é€
 **
 *********************************************************************************
-**             ĞŞ¸ÄÀúÊ·¼ÇÂ¼
+**             ä¿®æ”¹å†å²è®°å½•
 **===============================================================================
-**| ÈÕÆÚ       | ×÷Õß   |  ĞŞ¸Ä¼ÇÂ¼
+**| æ—¥æœŸ       | ä½œè€…   |  ä¿®æ”¹è®°å½•
 **===============================================================================
-**| 2015/09/28 | zzh    |  ´´½¨¸ÃÎÄ¼ş
+**| 2015/09/28 | zzh    |  åˆ›å»ºè¯¥æ–‡ä»¶
 **
 *********************************************************************************/
 
@@ -31,23 +31,23 @@
 
 /*
 ********************************************************************************
-* ²ÎÊı¶¨Òå
+* å‚æ•°å®šä¹‰
 ********************************************************************************
 */
 #define DEBUG_UDP                       0 
 
 #define MAX_MSG_LEN                     1024
 #define UDP_PORT_17722                  17722
-#define SEND_BUF_SIZE                   1500                    /* ·¢ËÍ»º³åÇø */
-#define RECV_BUF_SIZE                   1500                    /* ½ÓÊÕ»º³åÇø */
-#define DATA_BUF_SIZE                   1500                    /* Ò»¸öÊı¾İ°üµÄ×î´ó³¤¶È */
+#define SEND_BUF_SIZE                   1500                    /* å‘é€ç¼“å†²åŒº */
+#define RECV_BUF_SIZE                   1500                    /* æ¥æ”¶ç¼“å†²åŒº */
+#define DATA_BUF_SIZE                   1500                    /* ä¸€ä¸ªæ•°æ®åŒ…çš„æœ€å¤§é•¿åº¦ */
 
-#define PERIOD_SCAN                     20                      /* É¨Ãè¶¨Ê±Æ÷ÖÜÆÚ, µ¥Î»: ms */
-#define MAX_CONNECT                     (10*1000/PERIOD_SCAN)   /* socketÁ¬½Ó³¬Ê±Ê±¼ä */
+#define PERIOD_SCAN                     20                      /* æ‰«æå®šæ—¶å™¨å‘¨æœŸ, å•ä½: ms */
+#define MAX_CONNECT                     (10*1000/PERIOD_SCAN)   /* socketè¿æ¥è¶…æ—¶æ—¶é—´ */
 char remote_ip[30];
 /*
 ********************************************************************************
-* ¶¨ÒåĞ­Òé½ÓÊÕ´¦ÀíµÄ²½Öè
+* å®šä¹‰åè®®æ¥æ”¶å¤„ç†çš„æ­¥éª¤
 ********************************************************************************
 */
 #define RECV_HEAD                       0
@@ -56,31 +56,31 @@ char remote_ip[30];
 
 /*
 ********************************************************************************
-* ¶¨ÒåÊı¾İ½á¹¹
+* å®šä¹‰æ•°æ®ç»“æ„
 ********************************************************************************
 */
 typedef struct {
     int             sock_id;                    /* sock */
     uint32_t        dest_ip;
     uint32_t        dest_port;
-    bool_t          connected;                  /* ±êÊ¶Óë·şÎñÆ÷Ö®¼äµÄÁ¬½ÓÊÇ·ñÒÑ½¨Á¢ */
-    bool_t          sending;                    /* ±êÖ¾ÊÇ·ñÔÚ·¢ËÍÊı¾İ»òÒÑ·¢ËÍÍê±ÏµÈ´ıÓ¦´ğ */
-    uint8_t         send_buf[SEND_BUF_SIZE];    /* ·¢ËÍ»º³åÇø */
-    int             send_len;                   /* ·¢ËÍÊı¾İ³¤¶È */
-    int             send_pos;                   /* ·¢ËÍÎ»ÖÃ */
-    uint8_t         send_ack;                   /* Ó¦´ğ°ü·¢ËÍ */ 
-    uint8_t         ct_connect;                 /* Í³¼Æ½¨Á¢Á¬½ÓÊ±¼ä */
-    uint8_t         recv_step;                  /* Êı¾İ½ÓÊÕ²½Öè */
-    int             recv_length;                /* Êı¾İ³¤¶È */
-    uint8_t         data_buf[DATA_BUF_SIZE];    /* Êı¾İ½ÓÊÕ»º³åÇø */
-    int             data_len;                   /* ÒÑ½ÓÊÕµÄÊı¾İ³¤¶È */
-    uint32_t        seq_id;                     /* Á÷Ë®ºÅ */
-    sock_informer   informer;                   /* ·¢ËÍÍ¨Öªº¯Êı */
+    bool_t          connected;                  /* æ ‡è¯†ä¸æœåŠ¡å™¨ä¹‹é—´çš„è¿æ¥æ˜¯å¦å·²å»ºç«‹ */
+    bool_t          sending;                    /* æ ‡å¿—æ˜¯å¦åœ¨å‘é€æ•°æ®æˆ–å·²å‘é€å®Œæ¯•ç­‰å¾…åº”ç­” */
+    uint8_t         send_buf[SEND_BUF_SIZE];    /* å‘é€ç¼“å†²åŒº */
+    int             send_len;                   /* å‘é€æ•°æ®é•¿åº¦ */
+    int             send_pos;                   /* å‘é€ä½ç½® */
+    uint8_t         send_ack;                   /* åº”ç­”åŒ…å‘é€ */ 
+    uint8_t         ct_connect;                 /* ç»Ÿè®¡å»ºç«‹è¿æ¥æ—¶é—´ */
+    uint8_t         recv_step;                  /* æ•°æ®æ¥æ”¶æ­¥éª¤ */
+    int             recv_length;                /* æ•°æ®é•¿åº¦ */
+    uint8_t         data_buf[DATA_BUF_SIZE];    /* æ•°æ®æ¥æ”¶ç¼“å†²åŒº */
+    int             data_len;                   /* å·²æ¥æ”¶çš„æ•°æ®é•¿åº¦ */
+    uint32_t        seq_id;                     /* æµæ°´å· */
+    sock_informer   informer;                   /* å‘é€é€šçŸ¥å‡½æ•° */
 } udp_t;
 
 /*
 ********************************************************************************
-* ¶¨ÒåÄ£¿é¾Ö²¿±äÁ¿
+* å®šä¹‰æ¨¡å—å±€éƒ¨å˜é‡
 ********************************************************************************
 */
 static udp_t      s_ucb;
@@ -88,13 +88,13 @@ static uint8_t    s_scantmrid;
 static uint8_t    s_recv_buf[RECV_BUF_SIZE];
 
 /*******************************************************************
-** º¯ÊıÃû:     handle_recv_data
-** º¯ÊıÃèÊö:   ÇëÇóĞ­ÒéµÄ´¦Àí
-** ²ÎÊı:       [in]data:     ½ÓÊÕµ½µÄÊı¾İ£»
-**             [in]data_len£º½ÓÊÕµ½Êı¾İµÄ³¤¶È
-**             [in]to£º      ÊÕµ½¶Ô·½Êı¾İÕßµØÖ·ĞÅÏ¢
-** ·µ»Ø:       ´¦Àí½ÓÊÕÊı¾İ³É¹¦true;Ê§°Üfalse
-** ×¢Òâ:
+** å‡½æ•°å:     handle_recv_data
+** å‡½æ•°æè¿°:   è¯·æ±‚åè®®çš„å¤„ç†
+** å‚æ•°:       [in]data:     æ¥æ”¶åˆ°çš„æ•°æ®ï¼›
+**             [in]data_lenï¼šæ¥æ”¶åˆ°æ•°æ®çš„é•¿åº¦
+**             [in]toï¼š      æ”¶åˆ°å¯¹æ–¹æ•°æ®è€…åœ°å€ä¿¡æ¯
+** è¿”å›:       å¤„ç†æ¥æ”¶æ•°æ®æˆåŠŸtrue;å¤±è´¥false
+** æ³¨æ„:
 ********************************************************************/
 static bool_t handle_recv_data(uint8_t *data, int data_len, struct sockaddr_in to)
 {
@@ -140,24 +140,24 @@ static bool_t handle_recv_data(uint8_t *data, int data_len, struct sockaddr_in t
     stream_readdata(&rstrm, pkt.dest, sizeof(pkt.dest));
     pkt.dest_ip    = htonl(to.sin_addr.s_addr);
 
-    if (pkt.req_ack == LEE_ACK){                              /* ´¦ÀíÇëÇóºóµÄÓ¦´ğĞ­Òé */
+    if (pkt.req_ack == LEE_ACK){                              /* å¤„ç†è¯·æ±‚åçš„åº”ç­”åè®® */
         if (pkt.session_id == s_ucb.seq_id){
             if (s_ucb.informer != NULL){
                 s_ucb.informer(SOCK_RESULT_ACK, 0);
             }
         } else {
             if (s_ucb.informer != NULL){
-                s_ucb.informer(SOCK_RESULT_NAK, 0);      /* Á÷Ë®ºÅ´íÎó */
+                s_ucb.informer(SOCK_RESULT_NAK, 0);      /* æµæ°´å·é”™è¯¯ */
             }
             return false;
         }
         result = req_hdlpkt(stream_getptr(&rstrm), data_len - stream_getlen(&rstrm), &pkt);
-    } else if (pkt.req_ack == LEE_REQ){                      /* ÊÕµ½ÇëÇóºóÖ±½ÓÓ¦´ğ */
+    } else if (pkt.req_ack == LEE_REQ){                      /* æ”¶åˆ°è¯·æ±‚åç›´æ¥åº”ç­” */
         result = req_hdlpkt(stream_getptr(&rstrm), data_len - stream_getlen(&rstrm), &pkt);
         if (result == 0){
             result = RESULT_NOTRANS;
         }
-        param = req_hdlparam(pkt.cmd_type);              /* ÅĞ¶ÏÊÇ·ñÎªÓĞ²ÎÓ¦´ğ */
+        param = req_hdlparam(pkt.cmd_type);              /* åˆ¤æ–­æ˜¯å¦ä¸ºæœ‰å‚åº”ç­” */
         if(param){
             pkt.pkt_length = packet_head_length(&pkt) + sizeof(result) + pkt.body_len;
         } else {
@@ -177,15 +177,15 @@ static bool_t handle_recv_data(uint8_t *data, int data_len, struct sockaddr_in t
 
         stream_writeint(&wstrm,   pkt.pkt_length);
         stream_writedata(&wstrm,  pkt.dest, sizeof(pkt.dest)); 
-        stream_writedata(&wstrm,  pkt.src,  sizeof(pkt.src)); /* Ô´µØÖ·×÷ÎªÄ¿µÄµØÖ· */
-        stream_writebyte(&wstrm,  result);   /* 1³É¹¦;2´íÎó;3²»Ö§³Ö;4ÄÚ´æ²»×ã;5ÖÕÖ¹´«Êä */
+        stream_writedata(&wstrm,  pkt.src,  sizeof(pkt.src)); /* æºåœ°å€ä½œä¸ºç›®çš„åœ°å€ */
+        stream_writebyte(&wstrm,  result);   /* 1æˆåŠŸ;2é”™è¯¯;3ä¸æ”¯æŒ;4å†…å­˜ä¸è¶³;5ç»ˆæ­¢ä¼ è¾“ */
         if (param && pkt.body_len > 0){
             stream_writedata(&wstrm, pkt.prot_body, pkt.body_len);
-            if (pkt.prot_body != NULL){      /* ÊÍ·ÅÓĞ²ÎÓ¦´ğ×ÊÔ´ */
+            if (pkt.prot_body != NULL){      /* é‡Šæ”¾æœ‰å‚åº”ç­”èµ„æº */
                 LEE_FREE(pkt.prot_body);
             }
         }
-        stream_writeshort(&wstrm, 0xffff);   /* Ô¤Áô×Ö½ÚÌî³ä */
+        stream_writeshort(&wstrm, 0xffff);   /* é¢„ç•™å­—èŠ‚å¡«å…… */
         msg_len = stream_getlen(&wstrm);
         pkt.check_sum = getchksum_n(stream_getstartptr(&wstrm), msg_len);
         stream_writebyte(&wstrm,  pkt.check_sum);
@@ -212,10 +212,10 @@ static bool_t handle_recv_data(uint8_t *data, int data_len, struct sockaddr_in t
 }
 
 /*******************************************************************
-** º¯ÊıÃû:     scan_tmr_proc
-** º¯ÊıÃèÊö:   É¨Ãè¶¨Ê±Æ÷´¦Àíº¯Êı
-** ²ÎÊı:       ÎŞ
-** ·µ»Ø:       ÎŞ
+** å‡½æ•°å:     scan_tmr_proc
+** å‡½æ•°æè¿°:   æ‰«æå®šæ—¶å™¨å¤„ç†å‡½æ•°
+** å‚æ•°:       æ— 
+** è¿”å›:       æ— 
 ********************************************************************/
 static void scan_tmr_proc(void)
 {
@@ -228,19 +228,19 @@ static void scan_tmr_proc(void)
 
     if (s_ucb.sock_id == -1) {
         s_ucb.connected  = false;
-        //s_ucb.sock_id = (int)socket(AF_INET, SOCK_DGRAM, 0);    /* ´´½¨socket */
-        s_ucb.sock_id = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP); /* ´´½¨socket */
+        //s_ucb.sock_id = (int)socket(AF_INET, SOCK_DGRAM, 0);    /* åˆ›å»ºsocket */
+        s_ucb.sock_id = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP); /* åˆ›å»ºsocket */
         if (s_ucb.sock_id != -1) { 
 #if DEBUG_UDP > 0
             LEE_LOG("sock create success!");
 #endif
             LEE_MEMSET(&sockaddr, 0, sizeof(sockaddr));
             sockaddr.sin_family = AF_INET;
-            sockaddr.sin_addr.s_addr = htonl(INADDR_ANY); /* htonl Ö÷»úÊı×ª»»³ÉÎŞ·ûºÅ³¤ÕûĞÍµÄÍøÂç×Ö½ÚË³Ğò */
+            sockaddr.sin_addr.s_addr = htonl(INADDR_ANY); /* htonl ä¸»æœºæ•°è½¬æ¢æˆæ— ç¬¦å·é•¿æ•´å‹çš„ç½‘ç»œå­—èŠ‚é¡ºåº */
             sockaddr.sin_port = htons(UDP_PORT_17722);
 
             if (bind(s_ucb.sock_id, (struct sockaddr*) &sockaddr, sizeof(sockaddr))!= 0) {
-                close(s_ucb.sock_id);                   /* ÊÍ·Åsocket×ÊÔ´ */
+                close(s_ucb.sock_id);                   /* é‡Šæ”¾socketèµ„æº */
                 s_ucb.sock_id = -1;
             } else {
 #if DEBUG_UDP > 0
@@ -258,7 +258,7 @@ static void scan_tmr_proc(void)
 
 
 #if 0
-    if (!s_ucb.connected && s_ucb.send_len > 0) {        /* Î´Á¬½Ó³É¹¦ */
+    if (!s_ucb.connected && s_ucb.send_len > 0) {        /* æœªè¿æ¥æˆåŠŸ */
 
         LEE_MEMSET(&to, 0, sizeof(to));
         to.sin_family = AF_INET;
@@ -271,27 +271,27 @@ static void scan_tmr_proc(void)
         LEE_LOG("ip: %s:%d %d",ip, s_ucb.dest_port, s_ucb.sock_id);
 #endif 
         e = connect(s_ucb.sock_id, (struct sockaddr *)&to, sizeof(to));
-        if (e >= 0) {                                                    /* Á¬½Ó½¨Á¢³É¹¦ */
+        if (e >= 0) {                                                    /* è¿æ¥å»ºç«‹æˆåŠŸ */
 #if DEBUG_UDP > 0
             LEE_LOG("sock connect success!");
 #endif
             s_ucb.connected = true;
             goto br_recv;
-        } else if (e < 0) {                                             /* Á¬½Ó½¨Á¢Ê§°Ü */
+        } else if (e < 0) {                                             /* è¿æ¥å»ºç«‹å¤±è´¥ */
 #if DEBUG_UDP > 0
             LEE_LOG("sock can not connect!(e = %d)", e);
 #endif
-            close(s_ucb.sock_id);                                       /* ÊÍ·Åsocket×ÊÔ´ */
+            close(s_ucb.sock_id);                                       /* é‡Šæ”¾socketèµ„æº */
             s_ucb.sock_id = -1;
             if (s_ucb.informer != NULL){
                 s_ucb.informer(SOCK_RESULT_ERROR_SOCK, 0);
             }
-        } else {                                                        /* Á¬½Ó»¹ÔÚ½¨Á¢µ±ÖĞ */
-            if (++s_ucb.ct_connect >= MAX_CONNECT) {                    /* Á¬½Ó½¨Á¢Ê±¼ä³¬Ê± */
+        } else {                                                        /* è¿æ¥è¿˜åœ¨å»ºç«‹å½“ä¸­ */
+            if (++s_ucb.ct_connect >= MAX_CONNECT) {                    /* è¿æ¥å»ºç«‹æ—¶é—´è¶…æ—¶ */
 #if DEBUG_UDP > 0
                 LEE_LOG("sock connect time overflow!");
 #endif
-                close(s_ucb.sock_id);                                  /* ÊÍ·Åsocket×ÊÔ´ */
+                close(s_ucb.sock_id);                                  /* é‡Šæ”¾socketèµ„æº */
                 s_ucb.sock_id = -1;
                 if (s_ucb.informer != NULL){
                     s_ucb.informer(SOCK_RESULT_ERROR_SOCK, 0);
@@ -305,7 +305,7 @@ static void scan_tmr_proc(void)
 br_recv:
 
     tv.tv_sec  = 0;
-    tv.tv_usec = 10000; // 10 ºÁÃë
+    tv.tv_usec = 10000; // 10 æ¯«ç§’
     recv_len = 0;
 
     fcntl(s_ucb.sock_id, F_SETFL, O_NONBLOCK);
@@ -323,7 +323,7 @@ br_recv:
         loghex("rcv:", s_recv_buf, recv_len);
 #endif        
     }
-    if (recv_len > 0) {                                                 /* ½ÓÊÕµ½Êı¾İ */
+    if (recv_len > 0) {                                                 /* æ¥æ”¶åˆ°æ•°æ® */
         ptr = s_recv_buf;
         if (s_ucb.recv_step == RECV_HEAD || s_ucb.recv_step == RECV_LENGTH) {
             for (; recv_len > 0; ) {
@@ -336,13 +336,13 @@ br_recv:
                 recv_len--;
 
                 if (s_ucb.data_len >= 3) {                              
-                    if (s_ucb.recv_step == RECV_HEAD) {             /* ½ÓÊÕÍ¬²½Êı¾İÍ· */
+                    if (s_ucb.recv_step == RECV_HEAD) {             /* æ¥æ”¶åŒæ­¥æ•°æ®å¤´ */
                         if ( s_ucb.data_buf[s_ucb.data_len - 3] == SYNC_HEAD0
                           && s_ucb.data_buf[s_ucb.data_len - 2] == SYNC_HEAD1
                           && s_ucb.data_buf[s_ucb.data_len - 1] == SYNC_HEAD2) {
-                            s_ucb.recv_step = RECV_LENGTH;         /* ×ªÈë½ÓÊÕ°üÊı¾İÄÚÈİ³¤¶È */
+                            s_ucb.recv_step = RECV_LENGTH;         /* è½¬å…¥æ¥æ”¶åŒ…æ•°æ®å†…å®¹é•¿åº¦ */
                         }
-                    } else if (s_ucb.recv_step == RECV_LENGTH) {    /* ½ÓÊÕ°üÊı¾İÄÚÈİ³¤¶È */
+                    } else if (s_ucb.recv_step == RECV_LENGTH) {    /* æ¥æ”¶åŒ…æ•°æ®å†…å®¹é•¿åº¦ */
                         if (s_ucb.data_len < 17) {
                             continue;
                         }
@@ -359,7 +359,7 @@ br_recv:
                             }
                             goto br_send;
                         }
-                        s_ucb.recv_step = RECV_DATA;                /* ×ªÈë½ÓÊÕÊı¾İÄÚÈİ */  
+                        s_ucb.recv_step = RECV_DATA;                /* è½¬å…¥æ¥æ”¶æ•°æ®å†…å®¹ */  
                         break;
                     } 
                 }
@@ -367,7 +367,7 @@ br_recv:
         }
 
         if (recv_len > 0) {
-            if ((s_ucb.data_len + recv_len) > sizeof(s_ucb.data_buf)) { /* Êı¾İÄÚÈİÌ«³¤ */
+            if ((s_ucb.data_len + recv_len) > sizeof(s_ucb.data_buf)) { /* æ•°æ®å†…å®¹å¤ªé•¿ */
                 s_ucb.data_len  = 0;
                 s_ucb.recv_step = RECV_HEAD;
                 if (s_ucb.informer != NULL){
@@ -378,7 +378,7 @@ br_recv:
 
             LEE_MEMCPY(&s_ucb.data_buf[s_ucb.data_len], ptr, recv_len);
             s_ucb.data_len += recv_len;
-            if (s_ucb.data_len >= s_ucb.recv_length) {                  /* Êı¾İ°ü½ÓÊÕÍê±Ï */
+            if (s_ucb.data_len >= s_ucb.recv_length) {                  /* æ•°æ®åŒ…æ¥æ”¶å®Œæ¯• */
                 if (s_ucb.data_len >= 27) {
                     handle_recv_data(s_ucb.data_buf, s_ucb.data_len, sockaddr);
                 } else {
@@ -396,7 +396,7 @@ br_recv:
 #if DEBUG_UDP > 0
         LEE_LOG("sock is disconnected!");
 #endif
-        udp_reset();                                                /* Á¬½Ó±»¶Ï¿ª£¬ÊÍ·Åsocket×ÊÔ´ */
+        udp_reset();                                                /* è¿æ¥è¢«æ–­å¼€ï¼Œé‡Šæ”¾socketèµ„æº */
         if (s_ucb.informer != NULL){
             s_ucb.informer(SOCK_RESULT_ERROR_SOCK, 0);
         }
@@ -405,7 +405,7 @@ br_recv:
 
 br_send:
     if (s_ucb.sock_id != -1 && s_ucb.connected) {
-        if (s_ucb.send_len > 0) {                                       /* ÅĞ¶ÏÊÇ·ñÓĞ´ı·¢ËÍµÄÊı¾İ */
+        if (s_ucb.send_len > 0) {                                       /* åˆ¤æ–­æ˜¯å¦æœ‰å¾…å‘é€çš„æ•°æ® */
             to_len = sizeof(to);
             LEE_MEMSET(&to, 0, sizeof(to));
             to.sin_family = AF_INET;
@@ -416,8 +416,8 @@ br_send:
 #endif 
             send_len = sendto(s_ucb.sock_id, (char *)&s_ucb.send_buf[s_ucb.send_pos], (s_ucb.send_len > PKT_MAX_SIZE) ? PKT_MAX_SIZE : s_ucb.send_len, 0, (struct sockaddr *)&to, to_len);
             //send_len = send(s_ucb.sock_id, (char *)&s_ucb.send_buf[s_ucb.send_pos], (s_ucb.send_len > 1024) ? 1024 : s_ucb.send_len, 0);
-            if (send_len > 0) {                                         /* Êı¾İ·¢ËÍ³É¹¦ */
-                if (send_len >= s_ucb.send_len) {                       /* Êı¾İ°ü·¢ËÍÍê±Ï */
+            if (send_len > 0) {                                         /* æ•°æ®å‘é€æˆåŠŸ */
+                if (send_len >= s_ucb.send_len) {                       /* æ•°æ®åŒ…å‘é€å®Œæ¯• */
                     s_ucb.send_len  = 0;
                 } else {
                     s_ucb.send_len -= send_len;
@@ -431,7 +431,7 @@ br_send:
                         s_ucb.informer(SOCK_RESULT_ACK, 0);
                     }
                 }
-            } else {                                                    /* Êı¾İ·¢ËÍÊ§°Ü,ÒâÎ¶Á¬½Ó¿ÉÄÜÒÑ¾­¶Ï¿ª */
+            } else {                                                    /* æ•°æ®å‘é€å¤±è´¥,æ„å‘³è¿æ¥å¯èƒ½å·²ç»æ–­å¼€ */
 #if DEBUG_UDP > 0
                 LEE_LOG("sock is disconnected!");
 #endif
@@ -445,10 +445,10 @@ br_send:
 }
 
 /*******************************************************************
-** º¯ÊıÃû:     udp_is_sending
-** º¯ÊıÃèÊö:   ²éÑ¯udpÊÇ·ñÔÚ·¢ËÍÊı¾İ
-** ²ÎÊı:       ÎŞ
-** ·µ»Ø:       ÎŞ
+** å‡½æ•°å:     udp_is_sending
+** å‡½æ•°æè¿°:   æŸ¥è¯¢udpæ˜¯å¦åœ¨å‘é€æ•°æ®
+** å‚æ•°:       æ— 
+** è¿”å›:       æ— 
 ********************************************************************/
 bool_t udp_is_sending(void)
 {
@@ -456,14 +456,14 @@ bool_t udp_is_sending(void)
 }
 
 /*******************************************************************
-** º¯ÊıÃû:     udp_reset
-** º¯ÊıÃèÊö:   ¸´Î»socket, ½«ÒÑ´ò¿ªµÄsocket¹Ø±Õµô 
-** ²ÎÊı:       ÎŞ
-** ·µ»Ø:       ÎŞ
+** å‡½æ•°å:     udp_reset
+** å‡½æ•°æè¿°:   å¤ä½socket, å°†å·²æ‰“å¼€çš„socketå…³é—­æ‰ 
+** å‚æ•°:       æ— 
+** è¿”å›:       æ— 
 ********************************************************************/
 void udp_reset(void)
 {
-    if (s_ucb.sock_id != -1) {                                       /* ¹Ø±ÕÁ¬½Ó */
+    if (s_ucb.sock_id != -1) {                                       /* å…³é—­è¿æ¥ */
         close(s_ucb.sock_id);
         s_ucb.sock_id = -1;
     }
@@ -476,10 +476,10 @@ void udp_reset(void)
 }
 
 /*******************************************************************
-** º¯ÊıÃû:     udp_stopsend
-** º¯ÊıÃèÊö:   Í£Ö¹¼ÌĞø·¢ËÍ
-** ²ÎÊı:       ÎŞ
-** ·µ»Ø:       ÎŞ
+** å‡½æ•°å:     udp_stopsend
+** å‡½æ•°æè¿°:   åœæ­¢ç»§ç»­å‘é€
+** å‚æ•°:       æ— 
+** è¿”å›:       æ— 
 ********************************************************************/
 void udp_stopsend(void)
 {
@@ -489,11 +489,11 @@ void udp_stopsend(void)
 }
 
 /*******************************************************************
-** º¯ÊıÃû:     udp_big_send
-** º¯ÊıÃèÊö:   ÇëÇó·¢ËÍÊı¾İ°ü
-** ²ÎÊı:       [in]  pkt:              ·¢ËÍÊı¾İ°ü
-**             [in]  sock_informer:    »Øµ÷Í¨Öªº¯Êı
-** ·µ»Ø:       true--³É¹¦;  false--Ê§°Ü;
+** å‡½æ•°å:     udp_big_send
+** å‡½æ•°æè¿°:   è¯·æ±‚å‘é€æ•°æ®åŒ…
+** å‚æ•°:       [in]  pkt:              å‘é€æ•°æ®åŒ…
+**             [in]  sock_informer:    å›è°ƒé€šçŸ¥å‡½æ•°
+** è¿”å›:       true--æˆåŠŸ;  false--å¤±è´¥;
 ********************************************************************/
 bool_t udp_send(packet_t *pkt, void (* sock_informer)(SOCK_RESULT_E result, int ackcode))
 {
@@ -553,10 +553,10 @@ bool_t udp_send(packet_t *pkt, void (* sock_informer)(SOCK_RESULT_E result, int 
 }
 
 /*******************************************************************
-** º¯ÊıÃû:     init_udp
-** º¯ÊıÃèÊö:   Ä£¿é³õÊ¼»¯º¯Êı
-** ²ÎÊı:       ÎŞ
-** ·µ»Ø:       ÎŞ
+** å‡½æ•°å:     init_udp
+** å‡½æ•°æè¿°:   æ¨¡å—åˆå§‹åŒ–å‡½æ•°
+** å‚æ•°:       æ— 
+** è¿”å›:       æ— 
 ********************************************************************/
 void init_udp(void)
 {
@@ -572,10 +572,10 @@ void init_udp(void)
 }
 
 /*******************************************************************
-** º¯ÊıÃû:     uninit_udp
-** º¯ÊıÃèÊö:   Ä£¿éÈ¥Ê¼»¯º¯Êı
-** ²ÎÊı:       ÎŞ
-** ·µ»Ø:       ÎŞ
+** å‡½æ•°å:     uninit_udp
+** å‡½æ•°æè¿°:   æ¨¡å—å»å§‹åŒ–å‡½æ•°
+** å‚æ•°:       æ— 
+** è¿”å›:       æ— 
 ********************************************************************/
 void uninit_udp(void)
 {
